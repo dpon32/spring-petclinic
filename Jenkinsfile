@@ -10,38 +10,6 @@ pipeline {
   }
 
   stages {
-
-    stage('Build') {
-      agent {
-        docker {
-          image 'maven:3.5.0'
-          args '-e INITIAL_ADMIN_USER -e INITIAL_ADMIN_PASSWORD --network=dev'
-        }
-      }
-      steps {
-        configFileProvider([configFile(fileId: 'nexus', variable: 'MAVEN_SETTINGS')]) {
-          sh 'mvn -s $MAVEN_SETTINGS clean deploy -DskipTests=true -B'
-        }
-      }
-    }
-
-
-    stage('Get Artifact') {
-      agent {
-        docker {
-          image 'maven:3.5.0'
-          args '-e INITIAL_ADMIN_USER -e INITIAL_ADMIN_PASSWORD --network=dev'
-        }
-      }
-      steps {
-        sh 'mvn clean'
-        script {
-          pom = readMavenPom file: 'pom.xml'
-          getArtifact(pom.groupId, pom.artifactId, pom.version, 'petclinic')
-        }
-      }
-    }
-
     stage('Build container') {
       agent any
       steps {
@@ -114,7 +82,7 @@ pipeline {
       agent {
         docker {
           image 'maven:3.5.0'
-          args '--network=${LDOP_NETWORK_NAME}'
+          args '--network=dev'
         }
       }
       steps {
