@@ -56,7 +56,7 @@ pipeline {
       agent any
       steps {
         script {
-          if ( env.BRANCH_NAME == 'master' ) {
+          if ( env.BRANCH_NAME == 'develop' ) {
             pom = readMavenPom file: 'pom.xml'
             TAG = pom.version
           } else {
@@ -107,7 +107,7 @@ pipeline {
     
     stage('Deploy to dev') {
       when {
-        branch 'master'
+        branch 'develop'
       }
       agent any
       steps {
@@ -119,7 +119,7 @@ pipeline {
     
     stage('Smoke test dev') {
       when {
-        branch 'master'
+        branch 'develop'
       }
       agent {
         docker {
@@ -130,16 +130,6 @@ pipeline {
       steps {
         sh "cd regression-suite && mvn clean -B test -DPETCLINIC_URL=https://dev.petclinic.liatr.io/petclinic"
         echo "Should be accessible at https://dev.petclinic.liatr.io/petclinic"
-      }
-    }
-
-    stage('Deploy to qa') {
-      when {
-        branch 'master'
-      }
-      agent any
-      steps {
-        deployToEnvironment("ec2-user", "qa.petclinic.liatr.io", "petclinic-deploy-key", env.IMAGE, TAG, "spring-petclinic", "qa.petclinic.liatr.io")
       }
     }
     
